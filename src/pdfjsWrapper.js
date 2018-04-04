@@ -48,14 +48,14 @@ export default function(PDFJS) {
 	}
 
 
-	function PDFJSWrapper(canvasParent, annotationLayerElt, emitEvent, {width = null,height = null, maxWidth = null, maxHeight = null} = {width:null,height: null, maxWidth: null, maxHeight: null}) {
+	function PDFJSWrapper(canvasParent, annotationLayerElt, emitEvent, {width = null,height = null, maxWidth = null, maxHeight = null, display = null} = {width:null,height: null, maxWidth: null, maxHeight: null, display: null}) {
 
 		var pdfDoc = null;
 		var pdfPage = null;
 		var pdfRender = null;
 		var canceling = false;
 		var canvasElt = document.createElement('canvas');
-		canvasElt.style.display = 'block';
+		canvasElt.style.display = display || 'block';
 		canvasElt.style.width = width || '100%'
 		height && (canvasElt.style.height = height);
 		maxWidth && (canvasElt.style.maxWidth = maxWidth);

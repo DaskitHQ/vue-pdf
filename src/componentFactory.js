@@ -46,22 +46,25 @@ export default function(pdfjsWrapper) {
 				default: 0,
 			},
 			height: {
-						type: Number,
-						default: null,
+				type: String,
+				default: null,
 			},
 			width: {
-						type: Number,
-						default: null,
+				type: String,
+				default: null,
 			},
 			maxHeight: {
-						type: Number,
-						default: null,
+				type: String,
+				default: null,
 			},
 			maxWidth: {
-						type: Number,
-						default: null,
+				type: String,
+				default: null,
 			},
-			
+			display: {
+				type: String,
+				default: null,
+			},
 		},
 		watch: {
 			src: function() {
@@ -105,7 +108,17 @@ export default function(pdfjsWrapper) {
 		// doc: mounted hook is not called during server-side rendering.
 		mounted: function() {
 
-			this.pdf = new PDFJSWrapper(this.$refs.canvasParent, this.$refs.annotationLayer, this.$emit.bind(this), {height: this.height, width: this.width, maxWidth: this.maxWidth, maxHeight: this.maxHeight});
+			this.pdf = new PDFJSWrapper(
+				this.$refs.canvasParent,
+				this.$refs.annotationLayer,
+				this.$emit.bind(this),
+				{
+					height: this.height,
+					width: this.width, 
+					maxWidth: this.maxWidth,
+					maxHeight: this.maxHeight,
+					display: this.display
+				});
 
 			this.$on('loaded', function() {
 
