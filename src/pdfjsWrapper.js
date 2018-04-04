@@ -33,11 +33,11 @@ export default function(PDFJS) {
 				});
 			}
 		};
-		
+
 
 		var loadingTask = PDFJS.getDocument(source);
 		loadingTask.__PDFDocumentLoadingTask = true; // since PDFDocumentLoadingTask is not public
-		
+
 		if ( options && options.onPassword )
 			loadingTask.onPassword = options.onPassword;
 
@@ -48,30 +48,33 @@ export default function(PDFJS) {
 	}
 
 
-	function PDFJSWrapper(canvasParent, annotationLayerElt, emitEvent) {
-		
+	function PDFJSWrapper(canvasParent, annotationLayerElt, emitEvent, {width = null,height = null, maxWidth = null, maxHeight = null} = {width:null,height: null, maxWidth: null, maxHeight: null}) {
+
 		var pdfDoc = null;
 		var pdfPage = null;
 		var pdfRender = null;
 		var canceling = false;
 		var canvasElt = document.createElement('canvas');
 		canvasElt.style.display = 'block';
-		canvasElt.style.width = '100%';
+		canvasElt.style.width = width || '100%'
+		height && (canvasElt.style.height = height);
+		maxWidth && (canvasElt.style.maxWidth = maxWidth);
+		maxHeight && (canvasElt.style.maxHeight = maxHeight);
 		canvasParent.appendChild(canvasElt);
 
 		function clearCanvas() {
-			
+
 			canvasElt.getContext('2d').clearRect(0, 0, canvasElt.width, canvasElt.height);
 		}
-		
+
 		function clearAnnotations() {
-			
+
 			while ( annotationLayerElt.firstChild )
 				annotationLayerElt.removeChild(annotationLayerElt.firstChild);
 		}
-		
+
 		this.destroy = function() {
-			
+
 			if ( pdfDoc === null )
 				return;
 			pdfDoc.destroy();
@@ -85,9 +88,9 @@ export default function(PDFJS) {
 		this.getCanvas = function() {
 			return canvasElt;
 		}
-		
+
 		this.getResolutionScale = function() {
-			
+
 			return canvasElt.offsetWidth / canvasElt.width;
 		}
 
@@ -95,44 +98,44 @@ export default function(PDFJS) {
 
 			if ( pdfPage === null )
 				return;
-			
+
 			// 1in == 72pt
 			// 1in == 96px
 			var PRINT_RESOLUTION = dpi === undefined ? 150 : dpi;
 			var PRINT_UNITS = PRINT_RESOLUTION / 72.0;
 			var CSS_UNITS = 96.0 / 72.0;
-			
+
 			var iframeElt = document.createElement('iframe');
 
 			function removeIframe() {
 
 				iframeElt.parentNode.removeChild(iframeElt);
 			}
-			
+
 			new Promise(function(resolve, reject) {
 
 				iframeElt.frameBorder = '0';
 				iframeElt.scrolling = 'no';
-				iframeElt.width = '0px;' 
+				iframeElt.width = '0px;'
 				iframeElt.height = '0px;'
 				iframeElt.style.cssText = 'position: absolute; top: 0; left: 0';
 
 				iframeElt.onload = function() {
-					
+
 					resolve(this.contentWindow);
 				}
-				
+
 				window.document.body.appendChild(iframeElt);
 			})
 			.then(function(win) {
-				
+
 				win.document.title = '';
 
 				return pdfDoc.getPage(1)
 				.then(function(page) {
-					
+
 					var viewport = page.getViewport(1);
-					win.document.head.appendChild(win.document.createElement('style')).textContent = 
+					win.document.head.appendChild(win.document.createElement('style')).textContent =
 						'@supports ((size:A4) and (size:1pt 1pt)) {' +
 							'@page { margin: 1pt; size: ' + ((viewport.width * PRINT_UNITS) / CSS_UNITS) + 'pt ' + ((viewport.height * PRINT_UNITS) / CSS_UNITS) + 'pt; }' +
 						'}' +
@@ -151,20 +154,20 @@ export default function(PDFJS) {
 				})
 			})
 			.then(function(win) {
-				
+
 				var allPages = [];
-				
+
 				for ( var pageNumber = 1; pageNumber <= pdfDoc.numPages; ++pageNumber ) {
-					
+
 					if ( pageNumberOnly !== undefined && pageNumberOnly.indexOf(pageNumber) === -1 )
 						continue;
-					
+
 					allPages.push(
 						pdfDoc.getPage(pageNumber)
 						.then(function(page) {
 
 							var viewport = page.getViewport(1);
-						
+
 							var printCanvasElt = win.document.body.appendChild(win.document.createElement('canvas'));
 							printCanvasElt.width = (viewport.width * PRINT_UNITS);
 							printCanvasElt.height = (viewport.height * PRINT_UNITS);
@@ -181,22 +184,22 @@ export default function(PDFJS) {
 						})
 					);
 				}
-				
+
 				Promise.all(allPages)
 				.then(function() {
-					
+
 					win.focus(); // Required for IE
 					win.print();
 					removeIframe();
 				})
 				.catch(function(err) {
-				
+
 					removeIframe();
 					emitEvent('error', err);
 				})
 			})
 		}
-		
+
 		this.renderPage = function(rotate) {
 			if ( pdfRender !== null ) {
 
@@ -238,10 +241,10 @@ export default function(PDFJS) {
 				canvasContext: canvasElt.getContext('2d'),
 				viewport: viewport
 			});
-			
+
 			annotationLayerElt.style.visibility = 'hidden';
 			clearAnnotations();
-			
+
 			pdfPage.getAnnotations()
 			.then(function(annotations) {
 
@@ -272,7 +275,7 @@ export default function(PDFJS) {
 				}
 				emitEvent('error', err);
 			}.bind(this))
-		}		
+		}
 
 
 		this.forEachPage = function(pageCallback) {
@@ -284,7 +287,7 @@ export default function(PDFJS) {
 				pdfDoc.getPage(pageNum)
 				.then(pageCallback)
 				.then(function() {
-					
+
 					if ( ++pageNum <= numPages )
 						next(pageNum);
 				})
@@ -293,12 +296,12 @@ export default function(PDFJS) {
 
 
 		this.loadPage = function(pageNumber, rotate) {
-			
+
 			pdfPage = null;
-			
+
 			if ( pdfDoc === null )
 				return;
-			
+
 			pdfDoc.getPage(pageNumber)
 			.then(function(page) {
 
@@ -307,7 +310,7 @@ export default function(PDFJS) {
 				emitEvent('page-loaded', page.pageNumber);
 			}.bind(this))
 			.catch(function(err) {
-				
+
 				clearCanvas();
 				clearAnnotations();
 				emitEvent('error', err);
@@ -315,20 +318,20 @@ export default function(PDFJS) {
 		}
 
 		this.loadDocument = function(src) {
-			
+
 			pdfDoc = null;
 			pdfPage = null;
-			
+
 			emitEvent('num-pages', undefined);
 
 			if ( !src ) {
-				
+
 				canvasElt.removeAttribute('width');
 				canvasElt.removeAttribute('height');
 				clearAnnotations();
 				return;
 			}
-			
+
 			if ( isPDFDocumentLoadingTask(src) ) {
 
 				var loadingTask = src;
@@ -336,7 +339,7 @@ export default function(PDFJS) {
 
 				var loadingTask = createLoadingTask(src, {
 					onPassword: function(updatePassword, reason) {
-						
+
 						var reasonStr;
 						switch (reason) {
 							case PDFJS.PasswordResponses.NEED_PASSWORD:
@@ -349,28 +352,28 @@ export default function(PDFJS) {
 						emitEvent('password', updatePassword, reasonStr);
 					},
 					onProgress: function(status) {
-						
+
 						var ratio = status.loaded / status.total;
 						emitEvent('progress', Math.min(ratio, 1));
 					}
 				});
 			}
-			
+
 			loadingTask
 			.then(function(pdf) {
-				
+
 				pdfDoc = pdf;
 				emitEvent('num-pages', pdf.numPages);
 				emitEvent('loaded');
 			})
 			.catch(function(err) {
-				
+
 				clearCanvas();
 				clearAnnotations();
 				emitEvent('error', err);
 			})
 		}
-		
+
 		annotationLayerElt.style.transformOrigin = '0 0';
 	}
 
