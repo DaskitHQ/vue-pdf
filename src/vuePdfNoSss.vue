@@ -9,7 +9,7 @@
 	} else {
 
 		var pdfjsWrapper = require('./pdfjsWrapper.js').default;
-		var PDFJS = require('pdfjs-dist/webpack.js');
+		var PDFJS = require('pdfjs-dist/build/pdf.js');
 		var component = componentFactory(pdfjsWrapper(PDFJS));
 	}
 
