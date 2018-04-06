@@ -112,13 +112,12 @@ export default function(pdfjsWrapper) {
 				this.$refs.canvasParent,
 				this.$refs.annotationLayer,
 				this.$emit.bind(this),
-				{
-					height: this.height,
-					width: this.width, 
-					maxWidth: this.maxWidth,
-					maxHeight: this.maxHeight,
-					display: this.display
-				});
+				this.height,
+				this.width,
+				this.maxWidth,
+				this.maxHeight,
+				this.display
+				);
 
 			this.$on('loaded', function() {
 

@@ -48,7 +48,7 @@ export default function(PDFJS) {
 	}
 
 
-	function PDFJSWrapper(canvasParent, annotationLayerElt, emitEvent, {width = null,height = null, maxWidth = null, maxHeight = null, display = null} = {width:null,height: null, maxWidth: null, maxHeight: null, display: null}) {
+	function PDFJSWrapper(canvasParent, annotationLayerElt, emitEvent, width ,height, maxWidth, maxHeight, display) {
 
 		var pdfDoc = null;
 		var pdfPage = null;
