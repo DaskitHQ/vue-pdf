@@ -112,8 +112,8 @@ export default function(pdfjsWrapper) {
 				this.$refs.canvasParent,
 				this.$refs.annotationLayer,
 				this.$emit.bind(this),
-				this.height,
 				this.width,
+				this.height,
 				this.maxWidth,
 				this.maxHeight,
 				this.display
