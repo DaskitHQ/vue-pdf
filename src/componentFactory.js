@@ -87,7 +87,7 @@ export default function(pdfjsWrapper) {
 					return;
 
 				// on IE10- canvas height must be set
-				!this.height && this.pdf.setCanvasHeight(this.pdf.getCanvas().offsetWidth * (this.pdf.getCanvas().height / this.pdf.getCanvas().width) + 'px');
+				!this.height && !this.width && this.pdf.setCanvasHeight(this.pdf.getCanvas().offsetWidth * (this.pdf.getCanvas().height / this.pdf.getCanvas().width) + 'px');
 				// update the page when the resolution is too poor
 				var resolutionScale = this.pdf.getResolutionScale();
 
@@ -122,10 +122,11 @@ export default function(pdfjsWrapper) {
 			this.$on('loaded', function() {
 
 				this.pdf.loadPage(this.page, this.rotate);
+				this.pdf.loadPage(this.page, this.rotate);
 			});
 
 			this.$on('page-size', function(width, height) {
-				!this.height && this.pdf.setCanvasHeight(this.pdf.getCanvas().offsetWidth  * (height / width) + 'px');
+				!this.height  && !this.width && this.pdf.setCanvasHeight(this.pdf.getCanvas().offsetWidth  * (height / width) + 'px');
 			});
 
 			this.pdf.loadDocument(this.src);
